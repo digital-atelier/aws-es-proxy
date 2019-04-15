@@ -15,7 +15,7 @@ pipeline {
     TIMEOUT_IN_SECS = 180
 	}
 	stages {
-		stage('Prepare'){
+		stage('Checkout'){
 			agent {
 				label 'jenkins-base-agent'
 			}
