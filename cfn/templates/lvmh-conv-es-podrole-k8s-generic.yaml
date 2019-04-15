@@ -1,0 +1,109 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: CloudFormation template to create a role that would provide elastic search access to kubernetes containers.
+Parameters:
+  Team:
+    Description: Name of the Team
+    Type: String
+    Default: conv
+  ServiceName:
+    Description: Service name for this cloudformation resource
+    Type: String
+    Default: logging
+  ServiceType:
+    Description: Service type for this cloudformation resource is it a lambda, network, role etc
+    Type: String
+    Default: es
+  Brand:
+    Default: all
+    Description: Brand name prefix for the Stack
+    Type: String
+  ESDomainName:
+    Description: Enter the ElasticSearch domain name
+    Type: String
+    Default: all-logging-es
+  K8SNodeRoleArn:
+    Default: 'arn:aws:iam::969628048091:role/nodes.k8s.lvmhda.com'
+    Description: The arn information of K8S worker nodes
+    Type: String
+
+
+Resources:
+
+  Role:
+    Type: AWS::IAM::Role
+    DeletionPolicy: Retain
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [ec2.amazonaws.com]
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            AWS: [!Ref K8SNodeRoleArn]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: !Sub "${Team}-${Brand}-${ServiceName}-${ServiceType}-policy-services"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: arn:aws:logs:eu-west-1:*:*
+            - Effect: Allow
+              Action:
+                - iam:PassRole
+                - iam:GetServerCertificate
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - es:ESHttpGet
+              Resource:
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/_all/_settings
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/_cluster/stats
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/conv-applogs/_mapping/typename
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/conv-applogs*/_mapping/conv-applogs
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/conv-applogs-short/_mapping/typename
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/conv-applogs-short*/_mapping/conv-applogs-short
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/_nodes
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/_nodes/stats
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/_nodes/*/stats
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/_stats
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/conv-applogs*/_stats
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/conv-applogs-short*/_stats
+            - Effect: Allow
+              Action:
+                - es:ESHttpGet
+              Resource:
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/_all/_settings
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/_cluster/stats
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/conv-elblogs/_mapping/typename
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/conv-elblogs*/_mapping/conv-elblogs
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/conv-elblogs-short/_mapping/typename
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/conv-elblogs-short*/_mapping/conv-elblogs-short
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/_nodes
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/_nodes/stats
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/_nodes/*/stats
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/_stats
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/conv-elblogs*/_stats
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/conv-elblogs-short*/_stats
+            - Effect: Allow
+              Action:
+                - es:DescribeElasticsearchDomain
+                - es:DescribeElasticsearchDomains
+                - es:DescribeElasticsearchDomainConfig
+                - es:ESHttpPost
+                - es:ESHttpPut
+              Resource:
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}
+                - !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ESDomainName}/*
+  
