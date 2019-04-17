@@ -6,8 +6,8 @@ pipeline {
 	agent none
 	environment {
 	SHORT_COMMIT_HASH = ''
-	TEAM = 'conv'
-    PROJECT = 'chatbot'
+	TEAM = 'all'
+    PROJECT = 'platform'
     SERVICENAME = 'es-proxy'
     ECRURL = 'https://969628048091.dkr.ecr.eu-west-1.amazonaws.com'
     ECRSHORTURL = '969628048091.dkr.ecr.eu-west-1.amazonaws.com'

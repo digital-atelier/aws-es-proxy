@@ -1,0 +1,6 @@
+elasticsearch.url: "http://localhost:9200"
+keycloak.serverUrl: "https://sso.lvmhda.com/auth/"
+keycloak.realm: "Lvmh-Digital"
+keycloak.clientId: "kibana"
+keycloak.clientSecret: "feda56dd-be2d-4595-86b5-b809fc7eadef"
+keycloak.session.cookieOptions.password: "JWFn3Er]PqNZ7n{H$L9aa}Eeg#J`9?zb-/jyt?;#px>?@xaYrx_"P>Y%k[~7VGWV"
