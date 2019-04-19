@@ -46,6 +46,7 @@ pipeline {
         			  echo "Short Commit Hash is ${SHORT_COMMIT_HASH}"
         			  env.ECR_REPO = "${TEAM}-${PROJECT}-${SERVICENAME}"
         			  env.PROJECT_PROD_IMAGE = "$ECR_REPO:prod-$SHORT_COMMIT_HASH"
+        			  env.PROJECT_LATEST_IMAGE = "$ECR_REPO:latest"
         		}
 			}
 		}
@@ -56,6 +57,7 @@ pipeline {
       		steps{
         		script {
 					docker.build("$PROJECT_PROD_IMAGE",'.')
+					sh "docker tag $PROJECT_PROD_IMAGE $PROJECT_LATEST_IMAGE"
 				}
 			}
 		}
@@ -68,6 +70,7 @@ pipeline {
 				  sh '''set +x && $(aws ecr get-login --no-include-email --region $AWS_REGION)'''
 		          docker.withRegistry("${ECRURL}",) {
 		  			docker.image("$PROJECT_PROD_IMAGE").push()
+		  			docker.image("$PROJECT_LATEST_IMAGE").push()
 				  }
 				}
 			}
