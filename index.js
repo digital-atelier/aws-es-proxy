@@ -100,11 +100,23 @@ var requestHandler = function (request, response) {
     var buf = Buffer.concat(body).toString();
     console.log('Body:', buf);
 
-    co(function* () {
-        return yield execute(context.endpoint, context.region, request.url, request.method, buf);
+    co(function*(){
+        return yield execute(context.endpoint, context.region, request.url, request.headers, request.method, buf);
       })
       .then(resp => {
-        response.writeHead(resp.statusCode, { 'Content-Type': 'application/json' });
+        // We need to pass through the response headers from the origin
+        // back to the UA, but strip any connection control and content encoding
+        // headers
+        var headers = {}
+        var keys = Object.keys(resp.headers);
+        for (var i = 0, klen = keys.length; i < klen; i++) {
+          var k = keys[i]; 
+          if (k != undefined && k != "connection" && k != "content-encoding") {
+            headers[k] = resp.headers[keys[i]];
+          }
+        }
+
+        response.writeHead(resp.statusCode, headers);
         response.end(resp.body);
       })
       .catch(err => {
